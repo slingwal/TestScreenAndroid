@@ -185,6 +185,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
     /**
      * anotehr comment
+     * yet another one
      * Schedules a call to hide() in [delay] milliseconds, canceling any
      * previously scheduled calls.
      */
