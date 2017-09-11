@@ -1,10 +1,13 @@
 package com.example.testscreen;
 
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,15 +17,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
+
+
 public class FullscreenActivity extends AppCompatActivity {
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -94,8 +101,12 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     };
 
+    private DownloadManager downloadManager;
+    private long Image_DownloadId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
@@ -119,11 +130,27 @@ public class FullscreenActivity extends AppCompatActivity {
         //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
         String url = "http://wallscollection.net/wp-content/uploads/2016/12/Wide-Anchor-Wallpapers.jpg";
-        DownloadImageTask dTask = new DownloadImageTask(imageView);
-        dTask.execute(url);
 
 
 
+        String a = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)+"/AndroidTutorialPoint.jpg";
+
+        File file = new File(a);
+
+        Log.v("FILE",file.toString());
+        //Log.v("FILESTRING",a);
+        Log.v("FILELIST", Arrays.toString(file.list()));
+        if(file.exists()){
+            Bitmap bitmap = BitmapFactory.decodeFile(file.toString());
+            imageView.setImageBitmap(bitmap);
+            Log.v("FILE","Exists!");
+        }
+        else {
+            //DownloadImageTask dTask = new DownloadImageTask(imageView);
+            //dTask.execute(url);
+            Uri image_uri = Uri.parse("https://www.androidtutorialpoint.com/wp-content/uploads/2016/09/Beauty.jpg");
+            Image_DownloadId = DownloadData(image_uri);
+        }
     }
 
     @Override
@@ -215,5 +242,31 @@ public class FullscreenActivity extends AppCompatActivity {
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
+    }
+
+    private long DownloadData (Uri uri) {
+
+        long downloadReference;
+
+        // Create request for android download manager
+        downloadManager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        //Setting title of request
+        request.setTitle("Data Download");
+
+        //Setting description of request
+        request.setDescription("Android Data download using DownloadManager.");
+
+        //Set the local destination for the downloaded file to a path within the application's external files directory
+        request.setDestinationInExternalFilesDir(FullscreenActivity.this,Environment.DIRECTORY_DOWNLOADS,"AndroidTutorialPoint.jpg");
+
+        //Enqueue download and save into referenceId
+        downloadReference = downloadManager.enqueue(request);
+
+
+
+
+        return downloadReference;
     }
 }
